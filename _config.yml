@@ -62,3 +62,19 @@ exclude:
   - CONTRIBUTING.md
   - LICENSE.md
   - README.md
+  
+collections:
+  - people:
+    output: false
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: people
+    values:
+      type:
+        type: select
+        options:
+          - blog
+          - news

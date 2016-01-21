@@ -62,9 +62,9 @@ exclude:
   - CONTRIBUTING.md
   - LICENSE.md
   - README.md
-  
+
 collections:
-  - people:
+  people:
     output: false
 
 defaults:

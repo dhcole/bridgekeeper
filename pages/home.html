@@ -1,0 +1,110 @@
+---
+layout: page
+permalink: /
+---
+<div class="usa-grid">
+  <form id="form" class="usa-width-one-half"></form>
+  <div class="usa-width-one-half">
+    <h3>Approvers</h3>
+    <textarea readonly="" id="approver"></textarea>
+    <h3>Collaborators</h3>
+    <textarea readonly="" id="collaborator"></textarea>
+  </div>
+</div>
+<script>
+var people = [
+  {% for person in site.people %}
+  {
+    name: {{ person.name | jsonify }},
+    email: {{ person.email | jsonify }},
+    role: {{ person.role | jsonify }},
+    topics: {{ person.topics | jsonify }},
+    types: {{ person.types | jsonify }}
+  }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+];
+var roles = get('role');
+var topics = get('topics');
+var types = get('types');
+
+$(function() {
+  var check = _.template($('#checkboxes').html());
+  var radio = _.template($('#radiobuttons').html());
+  $('#form')
+    .append(check({ key: 'topic', items: topics }))
+    .append(radio({ key: 'type', items: types }))
+    .on('change', change);
+});
+
+function get(prop) {
+  return _.chain(people).pluck(prop).flatten().uniq().value();
+}
+
+function change(e) {
+  $('#collaborator, #approver').val('');
+  var criteria = _.chain($(this).serializeArray())
+    .map(function(item) { return {
+      key: item.name.split('-')[1],
+      value: item.value
+    } })
+    .groupBy('key')
+    .mapObject(function(val, key) {
+      return _.chain(val)
+        .pluck('value')
+        .uniq()
+        .value();
+    })
+    .value();
+  var match = _.chain(people)
+    .filter(function(person) {
+      if (!criteria.type) return false;
+      var typeMatch = _.contains(person.types, criteria.type[0]);
+      var topicMatch = _.any(criteria.topic, function(topic) {
+        return _.contains(person.topics, topic);
+      });
+      return typeMatch && topicMatch;
+    })
+    .groupBy('role')
+    .forEach(function(people, role) {
+      $('#' + role).val(_.map(people, function(person) {
+        return '"' + person.name + '" <' + person.email + '>';
+      }).join(', '));
+    });
+}
+</script>
+
+<script type="text/template" id="checkboxes">
+<h3><%- key %></h3>
+<ul class="usa-unstyled-list">
+  <% items.forEach(function(item, index) { %>
+  <li>
+    <input
+      type="checkbox"
+      name="item-<%- key %>-<%- index %>"
+      id="item-<%- key %>-<%- index %>"
+      value="<%- item %>">
+    <label for="item-<%- key %>-<%- index %>">
+      <%- item %>
+    </label>
+  </li>
+  <% }); %>
+</ul>
+</script>
+
+<script type="text/template" id="radiobuttons">
+<h3><%- key %></h3>
+<ul class="usa-unstyled-list">
+  <% items.forEach(function(item, index) { %>
+  <li>
+    <input
+      type="radio"
+      name="item-<%- key %>"
+      id="item-<%- key %>-<%- index %>"
+      value="<%- item %>">
+    <label for="item-<%- key %>-<%- index %>">
+      <%- item %>
+    </label>
+  </li>
+  <% }); %>
+</ul>
+</script>

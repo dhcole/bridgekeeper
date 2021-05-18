@@ -4,7 +4,7 @@ description:
   Must answer me
   These questions three
   Ere the other side he see
-baseurl: "" # the subpath of your site, e.g. /blog/
+baseurl: "/bridgekeeper/" # the subpath of your site, e.g. /blog/
 url: "https://example.gov" # the base hostname & protocol for your site
 
 colors:
